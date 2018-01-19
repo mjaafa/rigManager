@@ -1,5 +1,4 @@
 # /usr/bin/env python
-
 import urllib2, json
 from pprint import pprint
 import enum
@@ -7,6 +6,8 @@ import os
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
+from pyvirtualdisplay import Display
+from selenium import webdriver
 
 class maxProfit:
     coin            = 0
@@ -91,24 +92,29 @@ def determinateBestProfitable(__object__, __maxProfitInfo__):
     print ("The max profitable cryptocurrency = ", __maxProfitInfo__[maxProfit.coin], " with profitability within : ", __maxProfitInfo__[maxProfit.profitability]);
 
 
+def bestPoolSeeker(__url__, __cryptoCoin__):
+    display = Display(visible=0, size=(800, 600))
+    display.start()
+    browser = webdriver.Firefox()
+    fullUrl = __url__+__cryptoCoin__;
+    browser.get(fullUrl);
+    print browser.title
+    table = browser.find_element_by_tag_name("tbody");
+    all_rows = table.find_elements_by_tag_name("tr")
+    print "rows One", all_rows[1].text
+    cells = all_rows[1].find_elements_by_tag_name("td")
+    print ("Coins = ", cells[0].text)
+    browser.quit()
+    display.stop()
+
 print ("################################")
 print ("######     RigManager     ######")
 print ("################################")
 
-binary = FirefoxBinary('/usr/bin/firefox')
-browser = webdriver.Firefox(firefox_binary=binary)
-driver = webdriver.Firefox()
-driver.get("http://www.python.org")
-assert "Python" in driver.title
-elem = driver.find_element_by_name("q")
-elem.clear()
-elem.send_keys("pycon")
-elem.send_keys(Keys.RETURN)
-assert "No results found." not in driver.page_source
-driver.close()
-#data;
+
 #loadProfitabilityJsonInfo(data, "https://whattomine.com/coins.json");
 #pprint(data);
 determinateBestProfitable(data, maxProfitInfo);
-
+url = "https://investoon.com/mining_pools/";
+bestPoolSeeker(url, "eth");
 #print len(data['coins'])
