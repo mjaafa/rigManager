@@ -18,11 +18,12 @@ from bs4 import BeautifulSoup
 
 class maxProfit:
     coin            = 0
-    coinInfos       = 1
-    profitability24 = 2
-    profitability   = 3
-    poolServer      = 4
-    poolPort        = 5
+    coinAcron       = 1
+    coinInfos       = 2
+    profitability24 = 3
+    profitability   = 4
+    poolServer      = 5
+    poolPort        = 6
 
 coinsDictionnary = [ "BitcoinGold"
                     ,"Bytecoin"
@@ -63,13 +64,14 @@ coinsDictionnary = [ "BitcoinGold"
                     ,"Zclassic"
                     ,"Zencash"];
 
-maxProfitInfo = ["", "", 0, 0, {}, {}];
+maxProfitInfo = ["", "", "", 0, 0, {}, {}];
 
 headers = { 'User-Agent' : 'Mozilla/5.0' }
 req = urllib2.Request('https://whattomine.com/coins.json', None, headers)
 url = urllib2.urlopen(req).read()
 data = json.loads(url.decode())
 coins = data['coins'];
+pprint (data['coins']['Ethereum']['tag'].lower())
 
 def determinateBestProfitable(__object__, __maxProfitInfo__):
 
@@ -77,6 +79,7 @@ def determinateBestProfitable(__object__, __maxProfitInfo__):
         if(__object__['coins'][coinType]['profitability24'] > __maxProfitInfo__[maxProfit.profitability24]):
             __maxProfitInfo__[maxProfit.profitability24] = __object__['coins'][coinType]['profitability24'];
             __maxProfitInfo__[maxProfit.coin] = coinType;
+            __maxProfitInfo__[maxProfit.coinAcron] = __object__['coins'][coinType]['tag'].lower();
 
         if(__object__['coins'][coinType]['profitability'] > __maxProfitInfo__[maxProfit.profitability]):
             __maxProfitInfo__[maxProfit.profitability] = __object__['coins'][coinType]['profitability'];
@@ -110,7 +113,7 @@ print ("################################")
 
 determinateBestProfitable(data, maxProfitInfo);
 url = "https://investoon.com/mining_pools/";
-bestPoolSeeker(url, "eth", maxProfitInfo);
+bestPoolSeeker(url, maxProfitInfo[maxProfit.coinAcron], maxProfitInfo);
 print "Servers :  ", maxProfitInfo[maxProfit.poolServer], " | ", maxProfitInfo[maxProfit.poolPort]
 print "infos server and max profit "
 pprint(maxProfitInfo)
