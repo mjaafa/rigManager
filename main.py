@@ -102,7 +102,6 @@ def determinateBestProfitable(__object__, __maxProfitInfo__):
     #print ("The max profitable cryptocurrency = ", __maxProfitInfo__[maxProfit.coin], " with profitability within : ", __maxProfitInfo__[maxProfit.profitability24]);
     #print ("The max profitable cryptocurrency = ", __maxProfitInfo__[maxProfit.coin], " with profitability within : ", __maxProfitInfo__[maxProfit.profitability]);
 
-
 def bestPoolSeeker(__url__, __cryptoCoin__, __maxProfitInfo__):
     browser = webdriver.PhantomJS()
     fullUrl = __url__+__cryptoCoin__;
@@ -151,50 +150,15 @@ def workerMonitorData(s, pool):
             #print("Servers :  ", maxProfitInfo[maxProfit.poolServer], " | ", maxProfitInfo[maxProfit.poolPort])
             pprint(maxProfitInfo)
 
-def monitoringData():
-    while True:
-        logging.debug('Starting : monitoring data for max profit coin and pool');
-        determinateBestProfitable(data, maxProfitInfo);
-        url = "https://investoon.com/mining_pools/";
-        bestPoolSeeker(url, maxProfitInfo[maxProfit.coinAcron], maxProfitInfo);
-#        maxProfitInfo[maxProfit.poolServer]  = ['eu1.ethermine.org,eu2.ethermine.org,asia1.ethermine.org,us1.ethermine.org,us2.ethermine.org']
-#        maxProfitInfo[maxProfit.poolPort] = ['4444,4444,4444,4444,4444']
-#        maxProfitInfo[maxProfit.coin] = 'Ethereum';
-#        maxProfitInfo[maxProfit.coinAcron] = 'eth';
-#        maxProfitInfo[maxProfit.coinInfos] = 'F2pool\nMin Payout: 0.1 ETH\nHashRate: 20.5 TH/s\nDifficulty: 4 Billion\nETH PPS cn 3.0 %';
-#        maxProfitInfo[maxProfit.profitability] = 100;
-#        maxProfitInfo[maxProfit.profitability24] = 100;
-
-        print "Servers :  ", maxProfitInfo[maxProfit.poolServer], " | ", maxProfitInfo[maxProfit.poolPort]
-        print "infos server and max profit "
-        pprint(maxProfitInfo)
-        time.sleep(20)
-        logging.debug('Exiting')
-
-def monitoringDataPrc():
-    proc_ = multiprocessing.current_process()
-
-    print "Servers :  ", maxProfitInfo[maxProfit.poolServer], " | ", maxProfitInfo[maxProfit.poolPort], proc_.name, proc_.pid
-    while True:
-        sys.stdout.flush();
-        logging.debug('Starting : monitoring data for max profit coin and pool');
-        determinateBestProfitable(data, maxProfitInfo);
-        url = "https://investoon.com/mining_pools/";
-        bestPoolSeeker(url, maxProfitInfo[maxProfit.coinAcron], maxProfitInfo);
-#        maxProfitInfo[maxProfit.poolServer]  = ['eu1.ethermine.org,eu2.ethermine.org,asia1.ethermine.org,us1.ethermine.org,us2.ethermine.org']
-#        maxProfitInfo[maxProfit.poolPort] = ['4444,4444,4444,4444,4444']
-#        maxProfitInfo[maxProfit.coin] = 'Ethereum';
-#        maxProfitInfo[maxProfit.coinAcron] = 'eth';
-#        maxProfitInfo[maxProfit.coinInfos] = 'F2pool\nMin Payout: 0.1 ETH\nHashRate: 20.5 TH/s\nDifficulty: 4 Billion\nETH PPS cn 3.0 %';
-#        maxProfitInfo[maxProfit.profitability] = 100;
-#        maxProfitInfo[maxProfit.profitability24] = 100;
-
-        print "Servers :  ", maxProfitInfo[maxProfit.poolServer], " | ", maxProfitInfo[maxProfit.poolPort]
-        print "infos server and max profit "
-        pprint(maxProfitInfo)
-        time.sleep(20)
-        logging.debug('Exiting')
-        sys.stdout.flush();
+def workerMonitorMinerCmd(s, pool):
+    print('Waiting to join the pool')
+    with s:
+        name = threading.currentThread().getName()
+        while True:
+            pool.makeActive(name)
+            print('Starting : cmdLuncher ');
+            time.sleep(10)
+            pool.makeInactive(name)
 
 print ("################################")
 print ("######     RigManager     ######")
@@ -202,13 +166,7 @@ print ("################################")
 
 pool = ActivePool()
 s = threading.Semaphore(2)
-for i in range(1):
-    t = threading.Thread(target=workerMonitorData, name="workerMonitorData", args=(s, pool))
-    t.start()
-#monitoringDataTask = threading.Thread(name='monitoringData', target=monitoringData)
-#monitoringDataTask.setDaemon(True);
-#monitoringDataTask = multiprocessing.Process(name='daemon', target=monitoringDataPrc)
-#monitoringDataTask.daemon = True;
-#monitoringDataTask.start();
-#monitoringDataTask.join();
-
+tH1 = threading.Thread(target=workerMonitorData, name="workerMonitorData", args=(s, pool))
+tH1.start()
+tH2 = threading.Thread(target=workerMonitorMinerCmd, name="workerMonitorMinerCmd", args=(s, pool))
+tH2.start()
