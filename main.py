@@ -15,6 +15,13 @@ from selenium.webdriver.support.ui import WebDriverWait
 from bs4 import BeautifulSoup
 import requests
 from bs4 import BeautifulSoup
+import threading
+import time
+import logging
+import sys
+import multiprocessing
+import logging
+import random
 
 class maxProfit:
     coin            = 0
@@ -65,13 +72,21 @@ coinsDictionnary = [ "BitcoinGold"
                     ,"Zencash"];
 
 maxProfitInfo = ["", "", "", 0, 0, {}, {}];
+#logging.basicConfig(level=logging.DEBUG,
+#                    format='(%(threadName)-10s) ',
+#                    )
 
 headers = { 'User-Agent' : 'Mozilla/5.0' }
 req = urllib2.Request('https://whattomine.com/coins.json', None, headers)
 url = urllib2.urlopen(req).read()
 data = json.loads(url.decode())
 coins = data['coins'];
-pprint (data['coins']['Ethereum']['tag'].lower())
+#pprint (data['coins']['Ethereum']['tag'].lower())
+
+def worker(__workerName__):
+    """thread worker function"""
+    print "Worker: ", __workerName__;
+    return
 
 def determinateBestProfitable(__object__, __maxProfitInfo__):
 
@@ -84,8 +99,8 @@ def determinateBestProfitable(__object__, __maxProfitInfo__):
         if(__object__['coins'][coinType]['profitability'] > __maxProfitInfo__[maxProfit.profitability]):
             __maxProfitInfo__[maxProfit.profitability] = __object__['coins'][coinType]['profitability'];
 
-    print ("The max profitable cryptocurrency = ", __maxProfitInfo__[maxProfit.coin], " with profitability within : ", __maxProfitInfo__[maxProfit.profitability24]);
-    print ("The max profitable cryptocurrency = ", __maxProfitInfo__[maxProfit.coin], " with profitability within : ", __maxProfitInfo__[maxProfit.profitability]);
+    #print ("The max profitable cryptocurrency = ", __maxProfitInfo__[maxProfit.coin], " with profitability within : ", __maxProfitInfo__[maxProfit.profitability24]);
+    #print ("The max profitable cryptocurrency = ", __maxProfitInfo__[maxProfit.coin], " with profitability within : ", __maxProfitInfo__[maxProfit.profitability]);
 
 
 def bestPoolSeeker(__url__, __cryptoCoin__, __maxProfitInfo__):
@@ -107,14 +122,93 @@ def bestPoolSeeker(__url__, __cryptoCoin__, __maxProfitInfo__):
     __maxProfitInfo__[maxProfit.poolPort]   = port.split();
     browser.quit()
 
+class ActivePool(object):
+    def __init__(self):
+        super(ActivePool, self).__init__()
+        self.active = []
+        self.lock = threading.Lock()
+    def makeActive(self, name):
+        with self.lock:
+            self.active.append(name)
+            #logging.debug('Running: %s', self.active)
+    def makeInactive(self, name):
+        with self.lock:
+            self.active.remove(name)
+            #logging.debug('Running: %s', self.active)
+
+def workerMonitorData(s, pool):
+    print('Waiting to join the pool')
+    with s:
+        name = threading.currentThread().getName()
+        while True:
+            pool.makeActive(name)
+            print('Starting : monitoring data for max profit coin and pool');
+            determinateBestProfitable(data, maxProfitInfo);
+            url = "https://investoon.com/mining_pools/";
+            bestPoolSeeker(url, maxProfitInfo[maxProfit.coinAcron], maxProfitInfo);
+            time.sleep(10)
+            pool.makeInactive(name)
+            #print("Servers :  ", maxProfitInfo[maxProfit.poolServer], " | ", maxProfitInfo[maxProfit.poolPort])
+            pprint(maxProfitInfo)
+
+def monitoringData():
+    while True:
+        logging.debug('Starting : monitoring data for max profit coin and pool');
+        determinateBestProfitable(data, maxProfitInfo);
+        url = "https://investoon.com/mining_pools/";
+        bestPoolSeeker(url, maxProfitInfo[maxProfit.coinAcron], maxProfitInfo);
+#        maxProfitInfo[maxProfit.poolServer]  = ['eu1.ethermine.org,eu2.ethermine.org,asia1.ethermine.org,us1.ethermine.org,us2.ethermine.org']
+#        maxProfitInfo[maxProfit.poolPort] = ['4444,4444,4444,4444,4444']
+#        maxProfitInfo[maxProfit.coin] = 'Ethereum';
+#        maxProfitInfo[maxProfit.coinAcron] = 'eth';
+#        maxProfitInfo[maxProfit.coinInfos] = 'F2pool\nMin Payout: 0.1 ETH\nHashRate: 20.5 TH/s\nDifficulty: 4 Billion\nETH PPS cn 3.0 %';
+#        maxProfitInfo[maxProfit.profitability] = 100;
+#        maxProfitInfo[maxProfit.profitability24] = 100;
+
+        print "Servers :  ", maxProfitInfo[maxProfit.poolServer], " | ", maxProfitInfo[maxProfit.poolPort]
+        print "infos server and max profit "
+        pprint(maxProfitInfo)
+        time.sleep(20)
+        logging.debug('Exiting')
+
+def monitoringDataPrc():
+    proc_ = multiprocessing.current_process()
+
+    print "Servers :  ", maxProfitInfo[maxProfit.poolServer], " | ", maxProfitInfo[maxProfit.poolPort], proc_.name, proc_.pid
+    while True:
+        sys.stdout.flush();
+        logging.debug('Starting : monitoring data for max profit coin and pool');
+        determinateBestProfitable(data, maxProfitInfo);
+        url = "https://investoon.com/mining_pools/";
+        bestPoolSeeker(url, maxProfitInfo[maxProfit.coinAcron], maxProfitInfo);
+#        maxProfitInfo[maxProfit.poolServer]  = ['eu1.ethermine.org,eu2.ethermine.org,asia1.ethermine.org,us1.ethermine.org,us2.ethermine.org']
+#        maxProfitInfo[maxProfit.poolPort] = ['4444,4444,4444,4444,4444']
+#        maxProfitInfo[maxProfit.coin] = 'Ethereum';
+#        maxProfitInfo[maxProfit.coinAcron] = 'eth';
+#        maxProfitInfo[maxProfit.coinInfos] = 'F2pool\nMin Payout: 0.1 ETH\nHashRate: 20.5 TH/s\nDifficulty: 4 Billion\nETH PPS cn 3.0 %';
+#        maxProfitInfo[maxProfit.profitability] = 100;
+#        maxProfitInfo[maxProfit.profitability24] = 100;
+
+        print "Servers :  ", maxProfitInfo[maxProfit.poolServer], " | ", maxProfitInfo[maxProfit.poolPort]
+        print "infos server and max profit "
+        pprint(maxProfitInfo)
+        time.sleep(20)
+        logging.debug('Exiting')
+        sys.stdout.flush();
+
 print ("################################")
 print ("######     RigManager     ######")
 print ("################################")
 
-determinateBestProfitable(data, maxProfitInfo);
-url = "https://investoon.com/mining_pools/";
-bestPoolSeeker(url, maxProfitInfo[maxProfit.coinAcron], maxProfitInfo);
-print "Servers :  ", maxProfitInfo[maxProfit.poolServer], " | ", maxProfitInfo[maxProfit.poolPort]
-print "infos server and max profit "
-pprint(maxProfitInfo)
+pool = ActivePool()
+s = threading.Semaphore(2)
+for i in range(1):
+    t = threading.Thread(target=workerMonitorData, name="workerMonitorData", args=(s, pool))
+    t.start()
+#monitoringDataTask = threading.Thread(name='monitoringData', target=monitoringData)
+#monitoringDataTask.setDaemon(True);
+#monitoringDataTask = multiprocessing.Process(name='daemon', target=monitoringDataPrc)
+#monitoringDataTask.daemon = True;
+#monitoringDataTask.start();
+#monitoringDataTask.join();
 
