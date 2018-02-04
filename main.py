@@ -22,6 +22,8 @@ import sys
 import multiprocessing
 import logging
 import random
+import subprocess
+import ast
 
 class maxProfit:
     coin            = 0
@@ -31,6 +33,10 @@ class maxProfit:
     profitability   = 4
     poolServer      = 5
     poolPort        = 6
+
+class processIdx:
+    processMonitor  = 0
+    processLuncher  = 1
 
 coinsDictionnary = [ "BitcoinGold"
                     ,"Bytecoin"
@@ -72,10 +78,12 @@ coinsDictionnary = [ "BitcoinGold"
                     ,"Zencash"];
 
 maxProfitInfo = ["", "", "", 0, 0, {}, {}];
+luncherMiners = dict([ ("Ethereum", ".\Claymore\EthDcrMiner64.exe -wd 1 -r 1 -epool stratum+tcp://%s -ewal $WALLET -esm 0 -epsw x -allpools 1 -mport -%s -asm 1")])
 #logging.basicConfig(level=logging.DEBUG,
 #                    format='(%(threadName)-10s) ',
 #                    )
 
+processHldr = [0, 0]
 headers = { 'User-Agent' : 'Mozilla/5.0' }
 req = urllib2.Request('https://whattomine.com/coins.json', None, headers)
 url = urllib2.urlopen(req).read()
@@ -99,8 +107,8 @@ def determinateBestProfitable(__object__, __maxProfitInfo__):
         if(__object__['coins'][coinType]['profitability'] > __maxProfitInfo__[maxProfit.profitability]):
             __maxProfitInfo__[maxProfit.profitability] = __object__['coins'][coinType]['profitability'];
 
-    #print ("The max profitable cryptocurrency = ", __maxProfitInfo__[maxProfit.coin], " with profitability within : ", __maxProfitInfo__[maxProfit.profitability24]);
-    #print ("The max profitable cryptocurrency = ", __maxProfitInfo__[maxProfit.coin], " with profitability within : ", __maxProfitInfo__[maxProfit.profitability]);
+    print ("The max profitable cryptocurrency = ", __maxProfitInfo__[maxProfit.coin], " with profitability within : ", __maxProfitInfo__[maxProfit.profitability24]);
+    print ("The max profitable cryptocurrency = ", __maxProfitInfo__[maxProfit.coin], " with profitability within : ", __maxProfitInfo__[maxProfit.profitability]);
 
 def bestPoolSeeker(__url__, __cryptoCoin__, __maxProfitInfo__):
     browser = webdriver.PhantomJS()
@@ -117,8 +125,8 @@ def bestPoolSeeker(__url__, __cryptoCoin__, __maxProfitInfo__):
     rowz = _table_.findAll("td");
     server  = _table_['data-child-server']
     port    = _table_['data-child-port']
-    __maxProfitInfo__[maxProfit.poolServer] = server.split();
-    __maxProfitInfo__[maxProfit.poolPort]   = port.split();
+    __maxProfitInfo__[maxProfit.poolServer] = ast.literal_eval(json.dumps(server))
+    __maxProfitInfo__[maxProfit.poolPort]   = ast.literal_eval(json.dumps(port))
     browser.quit()
 
 class ActivePool(object):
@@ -147,6 +155,9 @@ def workerMonitorData(s, pool):
             bestPoolSeeker(url, maxProfitInfo[maxProfit.coinAcron], maxProfitInfo);
             time.sleep(10)
             pool.makeInactive(name)
+            port =  str(maxProfitInfo[maxProfit.poolPort]).split(',',1)
+            server =  str(maxProfitInfo[maxProfit.poolServer]).split(',',1)
+            processHldr[processIdx.processLuncher] = luncherMiners[maxProfitInfo[maxProfit.coin]] %(str(server[0]) + ":" + str(port[0]), str(port[0]))
             #print("Servers :  ", maxProfitInfo[maxProfit.poolServer], " | ", maxProfitInfo[maxProfit.poolPort])
             pprint(maxProfitInfo)
 
@@ -157,9 +168,46 @@ def workerMonitorMinerCmd(s, pool):
         while True:
             pool.makeActive(name)
             print('Starting : cmdLuncher ');
-            time.sleep(10)
+            run_win_cmd(processHldr[processIdx.processLuncher]);
+            time.sleep(10000)
             pool.makeInactive(name)
 
+def monitoringData():
+    while True:
+        logging.debug('Starting : monitoring data for max profit coin and pool');
+        determinateBestProfitable(data, maxProfitInfo);
+        url = "https://investoon.com/mining_pools/";
+        bestPoolSeeker(url, maxProfitInfo[maxProfit.coinAcron], maxProfitInfo);
+        print "Servers :  ", maxProfitInfo[maxProfit.poolServer], " | ", maxProfitInfo[maxProfit.poolPort]
+        print "infos server and max profit "
+        pprint(maxProfitInfo)
+        time.sleep(20)
+        logging.debug('Exiting')
+
+def run_win_cmd(cmd):
+    result = []
+    DETACHED_PROCESS = 0x00000008
+
+    print "function run_win_cmd"
+    process = subprocess.Popen(cmd,
+                               shell=True,
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE,
+                               creationflags=DETACHED_PROCESS)
+    print "output : ", process
+    processHldr[processIdx.processMonitor] = process.pid
+    #process.communicate();
+    print "process : ", process
+    print "process output", process.stdout
+    process.poll()
+    print "process : ", process
+    for line in process.stdout:
+        result.append(line)
+        errcode = process.returncode
+        for line in result:
+            print(line)
+    if errcode is not None:
+        raise Exception('cmd %s failed, see above for details', cmd)
 print ("################################")
 print ("######     RigManager     ######")
 print ("################################")
