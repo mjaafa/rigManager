@@ -78,12 +78,18 @@ coinsDictionnary = [ "BitcoinGold"
                     ,"Zclassic"
                     ,"Zencash"];
 
+global maxProfitInfo;
 maxProfitInfo = ["", "", "", 0, 0, {}, {}];
-luncherMiners = dict([ ("Ethereum", ".\Claymore\EthDcrMiner64.exe -wd 1 -r 1 -epool stratum+tcp://%s -ewal $WALLET -esm 0 -epsw x -allpools 1 -mport -%s -asm 1")])
+global lastMaxProfitInfo;
+lastMaxProfitInfo = ["", "", "", 0, 0, {}, {}];
+#luncherMiners = dict([ ("Ethereum", "C:\Claymore\EthDcrMiner64.exe \-epool %s \-ewal 0xe8a6ce621385b940eb0a73b18c78a3c5773bf4a2 \-epsw x \-wd 0")])
+luncherMiners = dict([ ("Ethereum", ".\Claymore\EthDcrMiner64.exe -wd 1 -r 1 -epool stratum+tcp://%s -ewal 0xe8a6ce621385b940eb0a73b18c78a3c5773bf4a2 -esm 0 -epsw x -allpools 1 -mport -%s -asm 1"),
+                       ("Zencash",  ".\ZecMiner\miner.exe --server %s --user znS42ysFP43wBW8yKbf2xVyRuHbQevzguKC --pass x --port %s --cuda_devices 0 1 2 3")])
+
 #logging.basicConfig(level=logging.DEBUG,
 #                    format='(%(threadName)-10s) ',
 #                    )
-
+global processHldr;
 processHldr = [0, 0]
 headers = { 'User-Agent' : 'Mozilla/5.0' }
 req = urllib2.Request('https://whattomine.com/coins.json', None, headers)
@@ -97,20 +103,37 @@ def worker(__workerName__):
     print "Worker: ", __workerName__;
     return
 
-def determinateBestProfitable(__object__, __maxProfitInfo__):
+def killWin32Process():
+    WMI = win32com.client.GetObject('winmgmts:')
+    processes = WMI.InstancesOf('Win32_Process')
+    for process in processes:
+        pid = process.Properties_('ProcessID').Value
+        parent = process.Properties_('ParentProcessId').Value
+        #print pid, parent
+        try :
+            if (processHldr[processIdx.processMonitor].pid == parent):
+                print( "process to kill ", pid, "parent = ", parent);
+                subprocess.Popen("TASKKILL /F /PID {pid} /T".format(pid=pid))
+        except ValueError:
+            print("error in PID ")
+def determinateBestProfitable(__object__, __lastMaxProfitInfo__, __maxProfitInfo__):
 
     for coinType in coinsDictionnary:
-        if(__object__['coins'][coinType]['profitability24'] > __maxProfitInfo__[maxProfit.profitability24]):
+        if(__object__['coins'][coinType]['profitability24'] > __lastMaxProfitInfo__[maxProfit.profitability24]):
             __maxProfitInfo__[maxProfit.profitability24] = __object__['coins'][coinType]['profitability24'];
             __maxProfitInfo__[maxProfit.coin] = coinType;
             __maxProfitInfo__[maxProfit.coinAcron] = __object__['coins'][coinType]['tag'].lower();
 
-        if(__object__['coins'][coinType]['profitability'] > __maxProfitInfo__[maxProfit.profitability]):
+        if(__object__['coins'][coinType]['profitability'] > __lastMaxProfitInfo__[maxProfit.profitability]):
             __maxProfitInfo__[maxProfit.profitability] = __object__['coins'][coinType]['profitability'];
 
     print ("The max profitable cryptocurrency = ", __maxProfitInfo__[maxProfit.coin], " with profitability within : ", __maxProfitInfo__[maxProfit.profitability24]);
     print ("The max profitable cryptocurrency = ", __maxProfitInfo__[maxProfit.coin], " with profitability within : ", __maxProfitInfo__[maxProfit.profitability]);
 
+    if ((__maxProfitInfo__[maxProfit.coin] != __lastMaxProfitInfo__[maxProfit.coin]) and processHldr[processIdx.processLuncher] is  ""):
+        killWin32Process()
+
+    __lastMaxProfitInfo__ = __maxProfitInfo__[:]
 def bestPoolSeeker(__url__, __cryptoCoin__, __maxProfitInfo__):
     browser = webdriver.PhantomJS()
     fullUrl = __url__+__cryptoCoin__;
@@ -128,6 +151,7 @@ def bestPoolSeeker(__url__, __cryptoCoin__, __maxProfitInfo__):
     port    = _table_['data-child-port']
     __maxProfitInfo__[maxProfit.poolServer] = ast.literal_eval(json.dumps(server))
     __maxProfitInfo__[maxProfit.poolPort]   = ast.literal_eval(json.dumps(port))
+    __lastMaxProfitInfo__ = __maxProfitInfo__[:]
     browser.quit()
 
 class ActivePool(object):
@@ -151,14 +175,19 @@ def workerMonitorData(s, pool):
         while True:
             pool.makeActive(name)
             print('Starting : monitoring data for max profit coin and pool');
-            determinateBestProfitable(data, maxProfitInfo);
+            determinateBestProfitable(data, lastMaxProfitInfo, maxProfitInfo);
             url = "https://investoon.com/mining_pools/";
-            bestPoolSeeker(url, maxProfitInfo[maxProfit.coinAcron], maxProfitInfo);
+            bestPoolSeeker(url, maxProfitInfo[maxProfit.coinAcron], maxProfitInfo, lastMaxProfitInfo);
             time.sleep(10)
             pool.makeInactive(name)
             port =  str(maxProfitInfo[maxProfit.poolPort]).split(',',1)
             server =  str(maxProfitInfo[maxProfit.poolServer]).split(',',1)
-            processHldr[processIdx.processLuncher] = luncherMiners[maxProfitInfo[maxProfit.coin]] %(str(server[0]) + ":" + str(port[0]), str(port[0]))
+            print " lunchminer ", luncherMiners[maxProfitInfo[maxProfit.coin]]
+            if (maxProfitInfo[maxProfit.coin] == "Ethereum"):
+                processHldr[processIdx.processLuncher] = luncherMiners[maxProfitInfo[maxProfit.coin]] %(str(server[0]) + ":" + str(port[0]), str(port[0]))
+            if (maxProfitInfo[maxProfit.coin] == "Zencash"):
+                processHldr[processIdx.processLuncher] = luncherMiners[maxProfitInfo[maxProfit.coin]] %(str(server[0]), str(port[0]))
+            print " luncher ", processHldr[processIdx.processLuncher]
             #print("Servers :  ", maxProfitInfo[maxProfit.poolServer], " | ", maxProfitInfo[maxProfit.poolPort])
             pprint(maxProfitInfo)
 
@@ -189,36 +218,22 @@ def run_win_cmd(cmd):
     result = []
     DETACHED_PROCESS = 0x00000008
 
-    print "function run_win_cmd"
-    process = subprocess.Popen(cmd,
-                               shell=True,
-                               stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE,
-                               creationflags=DETACHED_PROCESS)
-    print "output : ", process
-    processHldr[processIdx.processMonitor] = process.pid
+    print "function run_win_cmd", cmd
+    processHldr[processIdx.processMonitor] = subprocess.Popen(cmd,
+                                                                shell=True,
+                                                                stdout=subprocess.PIPE,
+                                                                stderr=subprocess.PIPE,
+#                                                                preexec_fn=os.setsid,
+                                                                creationflags=DETACHED_PROCESS)
     #process.communicate();
-    print "process : ", process
-    print "process output", process.stdout
-    process.poll()
-    print "process : ", process
-    for line in process.stdout:
+    #processHldr[processIdx.processMonitor].terminate()
+    for line in processHldr[processIdx.processMonitor].stdout:
         result.append(line)
-        errcode = process.returncode
+        errcode = processHldr[processIdx.processMonitor].returncode
         for line in result:
             print(line)
-    if errcode is not None:
-        raise Exception('cmd %s failed, see above for details', cmd)
-def killWin32Process():
-    WMI = win32com.client.GetObject('winmgmts:')
-    processes = WMI.InstancesOf('Win32_Process')
-    for process in processes:
-        pid = process.Properties_('ProcessID').Value
-        parent = process.Properties_('ParentProcessId').Value
-        #print pid, parent
-        if (processHldr[processIdx.processMonitor].pid == parent):
-            print( "process to kill ", pid, "parent = ", parent);
-            subprocess.Popen("TASKKILL /F /PID {pid} /T".format(pid=pid))
+#    if errcode is not None:
+#        raise Exception('cmd %s failed, see above for details', cmd)
 
 print ("################################")
 print ("######     RigManager     ######")
