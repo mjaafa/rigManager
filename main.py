@@ -134,7 +134,8 @@ def determinateBestProfitable(__object__, __lastMaxProfitInfo__, __maxProfitInfo
         killWin32Process()
 
     __lastMaxProfitInfo__ = __maxProfitInfo__[:]
-def bestPoolSeeker(__url__, __cryptoCoin__, __maxProfitInfo__):
+
+def bestPoolSeeker(__url__, __cryptoCoin__, __maxProfitInfo__, __lastMaxProfitInfo__):
     browser = webdriver.PhantomJS()
     fullUrl = __url__+__cryptoCoin__;
     browser.get(fullUrl);
@@ -197,7 +198,8 @@ def workerMonitorMinerCmd(s, pool):
         name = threading.currentThread().getName()
         while True:
             pool.makeActive(name)
-            print('Starting : cmdLuncher ');
+            print('Starting : cmdLuncher ', processHldr[processIdx.processLuncher]);
+
             run_win_cmd(processHldr[processIdx.processLuncher]);
             time.sleep(10000)
             pool.makeInactive(name)
@@ -205,13 +207,12 @@ def workerMonitorMinerCmd(s, pool):
 def monitoringData():
     while True:
         logging.debug('Starting : monitoring data for max profit coin and pool');
-        determinateBestProfitable(data, maxProfitInfo);
+        determinateBestProfitable(data, lastMaxProfitInfo, maxProfitInfo);
         url = "https://investoon.com/mining_pools/";
         bestPoolSeeker(url, maxProfitInfo[maxProfit.coinAcron], maxProfitInfo);
         print "Servers :  ", maxProfitInfo[maxProfit.poolServer], " | ", maxProfitInfo[maxProfit.poolPort]
         print "infos server and max profit "
         pprint(maxProfitInfo)
-        time.sleep(20)
         logging.debug('Exiting')
 
 def run_win_cmd(cmd):
@@ -243,5 +244,6 @@ pool = ActivePool()
 s = threading.Semaphore(2)
 tH1 = threading.Thread(target=workerMonitorData, name="workerMonitorData", args=(s, pool))
 tH1.start()
+time.sleep(30)
 tH2 = threading.Thread(target=workerMonitorMinerCmd, name="workerMonitorMinerCmd", args=(s, pool))
 tH2.start()
