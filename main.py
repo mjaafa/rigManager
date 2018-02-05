@@ -24,6 +24,7 @@ import logging
 import random
 import subprocess
 import ast
+import win32com.client
 
 class maxProfit:
     coin            = 0
@@ -208,6 +209,17 @@ def run_win_cmd(cmd):
             print(line)
     if errcode is not None:
         raise Exception('cmd %s failed, see above for details', cmd)
+def killWin32Process():
+    WMI = win32com.client.GetObject('winmgmts:')
+    processes = WMI.InstancesOf('Win32_Process')
+    for process in processes:
+        pid = process.Properties_('ProcessID').Value
+        parent = process.Properties_('ParentProcessId').Value
+        #print pid, parent
+        if (processHldr[processIdx.processMonitor].pid == parent):
+            print( "process to kill ", pid, "parent = ", parent);
+            subprocess.Popen("TASKKILL /F /PID {pid} /T".format(pid=pid))
+
 print ("################################")
 print ("######     RigManager     ######")
 print ("################################")
