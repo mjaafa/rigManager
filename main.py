@@ -20,11 +20,16 @@ import time
 import logging
 import sys
 import multiprocessing
+import os
+import signal
 import logging
 import random
 import subprocess
 import ast
+import itertools
 import win32com.client
+import pythoncom
+import wmi
 
 class maxProfit:
     coin            = 0
@@ -36,8 +41,9 @@ class maxProfit:
     poolPort        = 6
 
 class processIdx:
-    processMonitor  = 0
-    processLuncher  = 1
+    processMonitor      = 0
+    processLuncher      = 1
+    processLuncherLast  = 2
 
 coinsDictionnary = [ "BitcoinGold"
                     ,"Bytecoin"
@@ -79,24 +85,20 @@ coinsDictionnary = [ "BitcoinGold"
                     ,"Zencash"];
 
 global maxProfitInfo;
-maxProfitInfo = ["", "", "", 0, 0, {}, {}];
+maxProfitInfo = ["no_coin", "", "", 0, 0, {}, {}];
 global lastMaxProfitInfo;
-lastMaxProfitInfo = ["", "", "", 0, 0, {}, {}];
+lastMaxProfitInfo = ["no_coin", "", "", 0, 0, {}, {}];
 #luncherMiners = dict([ ("Ethereum", "C:\Claymore\EthDcrMiner64.exe \-epool %s \-ewal 0xe8a6ce621385b940eb0a73b18c78a3c5773bf4a2 \-epsw x \-wd 0")])
 luncherMiners = dict([ ("Ethereum", ".\Claymore\EthDcrMiner64.exe -wd 1 -r 1 -epool stratum+tcp://%s -ewal 0xe8a6ce621385b940eb0a73b18c78a3c5773bf4a2 -esm 0 -epsw x -allpools 1 -mport -%s -asm 1"),
                        ("Zencash",  ".\ZecMiner\miner.exe --server %s --user znS42ysFP43wBW8yKbf2xVyRuHbQevzguKC --pass x --port %s --cuda_devices 0 1 2 3")])
+#global luncher;
+__luncher= "";
 
 #logging.basicConfig(level=logging.DEBUG,
 #                    format='(%(threadName)-10s) ',
 #                    )
 global processHldr;
-processHldr = [0, 0]
-headers = { 'User-Agent' : 'Mozilla/5.0' }
-req = urllib2.Request('https://whattomine.com/coins.json', None, headers)
-url = urllib2.urlopen(req).read()
-data = json.loads(url.decode())
-coins = data['coins'];
-#pprint (data['coins']['Ethereum']['tag'].lower())
+processHldr = [0, 0, 0]
 
 def worker(__workerName__):
     """thread worker function"""
@@ -104,6 +106,7 @@ def worker(__workerName__):
     return
 
 def killWin32Process():
+    pythoncom.CoInitialize ()
     WMI = win32com.client.GetObject('winmgmts:')
     processes = WMI.InstancesOf('Win32_Process')
     for process in processes:
@@ -116,24 +119,52 @@ def killWin32Process():
                 subprocess.Popen("TASKKILL /F /PID {pid} /T".format(pid=pid))
         except ValueError:
             print("error in PID ")
-def determinateBestProfitable(__object__, __lastMaxProfitInfo__, __maxProfitInfo__):
+
+    pythoncom.CoUninitialize ()
+
+def determinateBestProfitable( __lastMaxProfitInfo__, __maxProfitInfo__):
+    print "BROWSER check"
+    headers = { 'User-Agent' : 'Mozilla/5.0' }
+    req = urllib2.Request('http://whattomine.com/coins.json', None, headers)
+    url = urllib2.urlopen(req).read()
+    urllib2.urlopen(req).close()
+
+    __object__ = json.loads(url.decode())
+    #pprint ( __object__)
+    lastCoin = __lastMaxProfitInfo__[maxProfit.coin]
+    for coinType in coinsDictionnary:
+        if(__lastMaxProfitInfo__[maxProfit.coin] ==  coinType):
+            #print ("update the new info related to the last coin", __maxProfitInfo__[maxProfit.coin])
+            __lastMaxProfitInfo__[maxProfit.profitability]      = __object__['coins'][coinType]['profitability'];
+            __lastMaxProfitInfo__[maxProfit.profitability24]    = __object__['coins'][coinType]['profitability24'];
+            __lastMaxProfitInfo__[maxProfit.coinAcron]          = __object__['coins'][coinType]['tag'].lower();
+            __lastMaxProfitInfo__[maxProfit.coin]               = __maxProfitInfo__[maxProfit.coin];
+
+    __maxProfitInfo__[maxProfit.profitability24] = 0;
+    __maxProfitInfo__[maxProfit.profitability] = 0;
+    __maxProfitInfo__[maxProfit.coin] = "";
+    __maxProfitInfo__[maxProfit.coinAcron] = 0;
 
     for coinType in coinsDictionnary:
-        if(__object__['coins'][coinType]['profitability24'] > __lastMaxProfitInfo__[maxProfit.profitability24]):
+        if(__object__['coins'][coinType]['profitability24'] > __maxProfitInfo__[maxProfit.profitability24]):
             __maxProfitInfo__[maxProfit.profitability24] = __object__['coins'][coinType]['profitability24'];
             __maxProfitInfo__[maxProfit.coin] = coinType;
             __maxProfitInfo__[maxProfit.coinAcron] = __object__['coins'][coinType]['tag'].lower();
 
-        if(__object__['coins'][coinType]['profitability'] > __lastMaxProfitInfo__[maxProfit.profitability]):
+        if(__object__['coins'][coinType]['profitability'] > __maxProfitInfo__[maxProfit.profitability]):
             __maxProfitInfo__[maxProfit.profitability] = __object__['coins'][coinType]['profitability'];
 
     print ("The max profitable cryptocurrency = ", __maxProfitInfo__[maxProfit.coin], " with profitability within : ", __maxProfitInfo__[maxProfit.profitability24]);
     print ("The max profitable cryptocurrency = ", __maxProfitInfo__[maxProfit.coin], " with profitability within : ", __maxProfitInfo__[maxProfit.profitability]);
+    if (__maxProfitInfo__[maxProfit.coin] != __lastMaxProfitInfo__[maxProfit.coin] and __lastMaxProfitInfo__[maxProfit.coin] != "no_coin"):
+            if (processHldr[processIdx.processLuncher] != ""):
+                print ("Process will be killed ")
+                pool.makeActive("workerMonitorMinerCmd")
+                killWin32Process()
 
-    if ((__maxProfitInfo__[maxProfit.coin] != __lastMaxProfitInfo__[maxProfit.coin]) and processHldr[processIdx.processLuncher] is  ""):
-        killWin32Process()
+    __lastMaxProfitInfo__[maxProfit.coin] = __maxProfitInfo__[maxProfit.coin]
 
-    __lastMaxProfitInfo__ = __maxProfitInfo__[:]
+    print ("coin =", __lastMaxProfitInfo__[maxProfit.coin])
 
 def bestPoolSeeker(__url__, __cryptoCoin__, __maxProfitInfo__, __lastMaxProfitInfo__):
     browser = webdriver.PhantomJS()
@@ -176,11 +207,12 @@ def workerMonitorData(s, pool):
         while True:
             pool.makeActive(name)
             print('Starting : monitoring data for max profit coin and pool');
-            determinateBestProfitable(data, lastMaxProfitInfo, maxProfitInfo);
+            determinateBestProfitable(lastMaxProfitInfo, maxProfitInfo);
+            print("lastMaxProfitInfo ::: ")
             url = "https://investoon.com/mining_pools/";
             bestPoolSeeker(url, maxProfitInfo[maxProfit.coinAcron], maxProfitInfo, lastMaxProfitInfo);
             time.sleep(10)
-            pool.makeInactive(name)
+
             port =  str(maxProfitInfo[maxProfit.poolPort]).split(',',1)
             server =  str(maxProfitInfo[maxProfit.poolServer]).split(',',1)
             print " lunchminer ", luncherMiners[maxProfitInfo[maxProfit.coin]]
@@ -199,9 +231,14 @@ def workerMonitorMinerCmd(s, pool):
         while True:
             pool.makeActive(name)
             print('Starting : cmdLuncher ', processHldr[processIdx.processLuncher]);
+            if (processHldr[processIdx.processLuncherLast] != processHldr[processIdx.processLuncher]):
+                if (0 != processHldr[processIdx.processMonitor]):
+                    print "kill process :: ", processHldr[processIdx.processLuncher]
+                run_win_cmd(processHldr[processIdx.processLuncher]);
+                processHldr[processIdx.processLuncherLast] = processHldr[processIdx.processLuncher];
 
-            run_win_cmd(processHldr[processIdx.processLuncher]);
-            time.sleep(10000)
+            print("process PID =", processHldr[processIdx.processLuncher]);
+            time.sleep(10)
             pool.makeInactive(name)
 
 def monitoringData():
