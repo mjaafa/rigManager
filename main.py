@@ -90,7 +90,8 @@ lastMaxProfitInfo = ["no_coin", "", "", 0, 0, {}, {}];
 #luncherMiners = dict([ ("Ethereum", "C:\Claymore\EthDcrMiner64.exe \-epool %s \-ewal 0xe8a6ce621385b940eb0a73b18c78a3c5773bf4a2 \-epsw x \-wd 0")])
 luncherMiners = dict([ ("Ethereum", ".\Claymore\EthDcrMiner64.exe -wd 1 -r 1 -epool stratum+tcp://%s -ewal 0xe8a6ce621385b940eb0a73b18c78a3c5773bf4a2 -esm 0 -epsw x -allpools 1 -mport -%s -asm 1"),
                        ("Zencash",  ".\ZecMiner\miner.exe --server %s --user znS42ysFP43wBW8yKbf2xVyRuHbQevzguKC --pass x --port %s --cuda_devices 0 1 2 3"),
-                       ("Zcash",    ".\\nheqminer\\nheqminer.exe -l %s:%s -u t1YsjcXbCrdk8RECih4EuQvwBCuLstHxiiS -p x -t8  -cd 0")])
+                       ("Zcash",    ".\\nheqminer\\nheqminer.exe -l %s:%s -u t1YsjcXbCrdk8RECih4EuQvwBCuLstHxiiS -p x -t8 -cd 0"),
+                       ("Zclassic", ".\\nheqminer\\nheqminer.exe -l %s:%s -u t1YsjcXbCrdk8RECih4EuQvwBCuLstHxiiS -p x -t8 -cd 0 ")])
 #global luncher;
 __luncher= "";
 
@@ -217,7 +218,7 @@ def workerMonitorData(s, pool):
             print " lunchminer ", luncherMiners[maxProfitInfo[maxProfit.coin]]
             if (maxProfitInfo[maxProfit.coin] == "Ethereum"):
                 processHldr[processIdx.processLuncher] = luncherMiners[maxProfitInfo[maxProfit.coin]] %(str(server[0]) + ":" + str(port[0]), str(port[0]))
-            if ((maxProfitInfo[maxProfit.coin] == "Zencash") or (maxProfitInfo[maxProfit.coin] == "Zcash")):
+            if ((maxProfitInfo[maxProfit.coin] == "Zencash") or (maxProfitInfo[maxProfit.coin] == "Zcash") or (maxProfitInfo[maxProfit.coin] == 'Zclassic')):
                 processHldr[processIdx.processLuncher] = luncherMiners[maxProfitInfo[maxProfit.coin]] %(str(server[0]), str(port[0]))
             print " luncher ", processHldr[processIdx.processLuncher]
             #print("Servers :  ", maxProfitInfo[maxProfit.poolServer], " | ", maxProfitInfo[maxProfit.poolPort])
