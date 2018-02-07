@@ -115,9 +115,25 @@ def parseConfig(__coin__):
     urllib2.urlopen(req).close()
 
     __command__ = ".\\%s\\%s " % (configJson[__coin__][0]['MinerTool'][0]['directory'],
-                                 configJson[__coin__][0]['MinerTool'][0]['executable'])
+                                  configJson[__coin__][0]['MinerTool'][0]['executable'])
+
+    port = str(maxProfitInfo[maxProfit.poolPort]).split(',', 1)
+    server = str(maxProfitInfo[maxProfit.poolServer]).split(',', 1)
+
     for key, value in configJson[__coin__][0]['options'][0].items():
-        opt = "{} {} ".format(key, value)
+        print "key :", key, "value:", value
+        if (value == "reserved"):
+            if(key == "-epool"):
+                opt = "{} stratum+tcp://{}:{} ".format(key, server[0], port[0])
+            if(key == "--server"):
+                opt = "{} {} ".format(key, server[0])
+            if(key == "-mport") or (key == "--port"):
+                opt = "{} {} ".format(key, port[0])
+            if(key == "-l"):
+                opt = "{} {}:{} ".format(key, server[0], port[0])
+        else:
+            opt = "{} {} ".format(key, value)
+
         __command__ += opt
 
     print " command :", __command__
