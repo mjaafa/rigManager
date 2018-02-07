@@ -1,0 +1,86 @@
+{
+  "ConfigFileVersion":
+  {
+    "Major":1,
+    "Minor":0,
+    "Revision":9
+    
+  },
+  
+  "Ethereum":[
+    {
+      "Tag":"Eth",
+      "MinerTool":[
+        {
+          "directory":"Claymore",
+          "executable":"EthDcrMiner64.exe"
+        }],
+        
+      "options":[
+        {
+          "-wd":1,
+          "-r":1,
+          "-epool":"reserved",
+          "-ewall":"0xe8a6ce621385b940eb0a73b18c78a3c5773bf4a2",
+          "-esm":0,
+          "-epsw":"x",
+          "-allpools":1,
+          "-mport":"reserved",
+          "asm":1
+        }]
+    }],
+  "ZenCash":[
+    {
+      "Tag":"Zen",
+      "MinerTool":[
+        {
+          "directory":"ZenMiner",
+          "executable":"miner.exe"
+        }],
+        
+      "options":[
+        {
+          "--server":"reserved",
+          "--user":"znS42ysFP43wBW8yKbf2xVyRuHbQevzguKC",
+          "--pass":"x",
+          "--port":"reserved",
+          "--cuda_devices":"0 1 2 3"
+        }]
+    }],
+  "Zcash":[
+    {
+      "Tag":"ZEC",
+      "MinerTool":[
+        {
+          "directory":"nheqminer",
+          "executable":"nheqminer.exe"
+        }],
+        
+      "options":[
+        {
+          "-l":"reserved",
+          "-u":"t1YsjcXbCrdk8RECih4EuQvwBCuLstHxiiS",
+          "-p":"x",
+          "-t":8,
+          "-cd":"0"
+        }]
+    }],
+  "Zclassic":[
+    {
+      "Tag":"ZCL",
+      "MinerTool":[
+        {
+          "directory":"nheqminer",
+          "executable":"nheqminer.exe"
+        }],
+        
+      "options":[
+        {
+          "-l":"reserved",
+          "-u":"t1YsjcXbCrdk8RECih4EuQvwBCuLstHxiiS",
+          "-p":"x",
+          "-t":8,
+          "-cd":"0"
+        }]
+    }]
+}
