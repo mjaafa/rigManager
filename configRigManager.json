@@ -82,5 +82,45 @@
           "-t":8,
           "-cd":"0"
         }]
+    }],
+	"Verge-Lyra2REv2":[
+    {
+      "Tag":"XVG",
+      "MinerTool":[
+        {
+          "directory":"ccminer",
+          "executable":"ccminer.exe"
+        }],
+        
+      "options":[
+        {
+          "-o":"stratum+tcp://xvg-mine.idcray.com:10061",
+          "-u":"rigManager",
+          "-p":"x",
+          "-cpu-priority=":3,
+          "-a":"myr-gr"
+        }]
+    }],
+	"Pirl":[
+    {
+      "Tag":"PIRL",
+      "MinerTool":[
+        {
+          "directory":"Claymore",
+          "executable":"EthDcrMiner64.exe"
+        }],
+        
+      "options":[
+        {
+          "-wd":1,
+          "-r":1,
+          "-epool":"reserved",
+          "-ewal":"0xe8a6ce621385b940eb0a73b18c78a3c5773bf4a2",
+          "-esm":0,
+          "-epsw":"x",
+          "-allpools":1,
+          "-mport":"reserved",
+          "-asm":1
+        }]
     }]
 }
