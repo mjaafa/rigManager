@@ -1,6 +1,8 @@
 # /usr/bin/env python
 import urllib2, json
 from pprint import pprint
+import requests
+
 import enum
 import os
 from selenium import webdriver
@@ -204,21 +206,28 @@ def determinateBestProfitable( __lastMaxProfitInfo__, __maxProfitInfo__):
 def bestPoolSeeker(__url__, __cryptoCoin__, __maxProfitInfo__, __lastMaxProfitInfo__):
     browser = webdriver.PhantomJS()
     fullUrl = __url__+__cryptoCoin__;
-    browser.get(fullUrl);
-    print browser.title
-    table = browser.find_element_by_tag_name("tbody");
-    #print "table : ", table.text
-    all_rows = table.find_elements_by_tag_name("tr")
-    __maxProfitInfo__[maxProfit.coinInfos] = all_rows[1].text
-    cells = all_rows[2].find_elements_by_tag_name("td")
-    soup = BeautifulSoup(browser.page_source, "html.parser")
-    _table_ = soup.find('tr', attrs={"class": u"table-pool"})
-    rowz = _table_.findAll("td");
-    server  = _table_['data-child-server']
-    port    = _table_['data-child-port']
-    __maxProfitInfo__[maxProfit.poolServer] = ast.literal_eval(json.dumps(server))
-    __maxProfitInfo__[maxProfit.poolPort]   = ast.literal_eval(json.dumps(port))
-    browser.quit()
+    print "full url", fullUrl
+    try :
+        browser.get(fullUrl);
+        r = requests.get(fullUrl)
+        if (200 != requests.get(fullUrl).status_code):
+            return
+
+        table = browser.find_element_by_tag_name("tbody");
+        #print "table : ", table.text
+        all_rows = table.find_elements_by_tag_name("tr")
+        __maxProfitInfo__[maxProfit.coinInfos] = all_rows[1].text
+        cells = all_rows[2].find_elements_by_tag_name("td")
+        soup = BeautifulSoup(browser.page_source, "html.parser")
+        _table_ = soup.find('tr', attrs={"class": u"table-pool"})
+        rowz = _table_.findAll("td");
+        server  = _table_['data-child-server']
+        port    = _table_['data-child-port']
+        __maxProfitInfo__[maxProfit.poolServer] = ast.literal_eval(json.dumps(server))
+        __maxProfitInfo__[maxProfit.poolPort]   = ast.literal_eval(json.dumps(port))
+
+    except IndexError:
+        browser.quit()
 
 class ActivePool(object):
     def __init__(self):
