@@ -22,11 +22,13 @@
           "-r":1,
           "-epool":"reserved",
           "-ewal":"0xbd3fc8a435e4bb3497c7330ed7672fc866f91dcb",
-          "-esm":0,
+          "-esm":3,
           "-epsw":"x",
           "-allpools":1,
           "-mport":"reserved",
-          "-asm":1
+          "-asm":1,
+	  "-eres":0,
+	  "-estale":0
         }]
     }],
   "Zencash":[
