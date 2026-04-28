@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.pytest_cache/
+.ruff_cache/
+
+# Runtime output
+reports/
+*.log
+
+# Local config containing personal wallet/miner paths
+configRigManager.json
+
+# Large binaries and media should go in GitHub Releases, not Git history
+*.exe
+*.mp4
+*.gif
+*.zip

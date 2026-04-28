@@ -1,0 +1,60 @@
+{
+  "version": "2.0",
+  "settings": {
+    "poll_interval_seconds": 300,
+    "report_dir": "reports",
+    "what_to_mine_url": "https://whattomine.com/coins.json",
+    "pool_url_template": "https://investoon.com/mining_pools/{tag}",
+    "allow_launch": false
+  },
+  "coins": {
+    "Ethereum": {
+      "tag": "eth",
+      "miner_tool": {
+        "directory": "miners/Claymore",
+        "executable": "EthDcrMiner64.exe"
+      },
+      "options": {
+        "-wd": 1,
+        "-r": 1,
+        "-epool": "reserved",
+        "-ewal": "${ETH_WALLET}",
+        "-esm": 3,
+        "-epsw": "x",
+        "-allpools": 1,
+        "-mport": "reserved",
+        "-asm": 1,
+        "-eres": 0,
+        "-estale": 0
+      }
+    },
+    "Zcash": {
+      "tag": "zec",
+      "miner_tool": {
+        "directory": "miners/nheqminer",
+        "executable": "nheqminer.exe"
+      },
+      "options": {
+        "-l": "reserved",
+        "-u": "${ZCASH_WALLET}",
+        "-p": "x",
+        "-t": 8,
+        "-cd": "0"
+      }
+    },
+    "Zencash": {
+      "tag": "zen",
+      "miner_tool": {
+        "directory": "miners/ZecMiner",
+        "executable": "miner.exe"
+      },
+      "options": {
+        "--server": "reserved",
+        "--user": "${ZEN_WALLET}",
+        "--pass": "x",
+        "--port": "reserved",
+        "--cuda_devices": "0 1 2 3"
+      }
+    }
+  }
+}

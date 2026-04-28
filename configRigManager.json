@@ -1,128 +1,52 @@
 {
-  "ConfigFileVersion":
-  {
-    "Major":1,
-    "Minor":0,
-    "Revision":9
-    
+  "version": "2.0",
+  "settings": {
+    "poll_interval_seconds": 300,
+    "report_dir": "reports",
+    "what_to_mine_url": "https://whattomine.com/coins.json",
+    "pool_url_template": "https://investoon.com/mining_pools/{tag}",
+    "allow_launch": true,
+    "min_profit_delta_percent": 5.0
   },
-  
-  "Ethereum":[
-    {
-      "Tag":"Eth",
-      "MinerTool":[
-        {
-          "directory":"Claymore",
-          "executable":"EthDcrMiner64.exe"
-        }],
-        
-      "options":[
-        {
-          "-wd":1,
-          "-r":1,
-          "-epool":"reserved",
-          "-ewal":"0xbd3fc8a435e4bb3497c7330ed7672fc866f91dcb",
-          "-esm":3,
-          "-epsw":"x",
-          "-allpools":1,
-          "-mport":"reserved",
-          "-asm":1,
-	  "-eres":0,
-	  "-estale":0
-        }]
-    }],
-  "Zencash":[
-    {
-      "Tag":"Zen",
-      "MinerTool":[
-        {
-          "directory":"ZecMiner",
-          "executable":"miner.exe"
-        }],
-        
-      "options":[
-        {
-          "--server":"reserved",
-          "--user":"znS42ysFP43wBW8yKbf2xVyRuHbQevzguKC",
-          "--pass":"x",
-          "--port":"reserved",
-          "--cuda_devices":"0 1 2 3"
-        }]
-    }],
-  "Zcash":[
-    {
-      "Tag":"ZEC",
-      "MinerTool":[
-        {
-          "directory":"nheqminer",
-          "executable":"nheqminer.exe"
-        }],
-        
-      "options":[
-        {
-          "-l":"reserved",
-          "-u":"t1YsjcXbCrdk8RECih4EuQvwBCuLstHxiiS",
-          "-p":"x",
-          "-t":8,
-          "-cd":"0"
-        }]
-    }],
-  "Zclassic":[
-    {
-      "Tag":"ZCL",
-      "MinerTool":[
-        {
-          "directory":"nheqminer",
-          "executable":"nheqminer.exe"
-        }],
-        
-      "options":[
-        {
-          "-l":"reserved",
-          "-u":"t1YsjcXbCrdk8RECih4EuQvwBCuLstHxiiS",
-          "-p":"x",
-          "-t":8,
-          "-cd":"0"
-        }]
-    }],
-	"Verge-Lyra2REv2":[
-    {
-      "Tag":"XVG",
-      "MinerTool":[
-        {
-          "directory":"ccminer",
-          "executable":"ccminer.exe"
-        }],
-        
-      "options":[
-        {
-          "-o":"stratum+tcp://xvg-mine.idcray.com:10061",
-          "-u":"rigManager",
-          "-p":"x",
-          "-cpu-priority=":3,
-          "-a":"myr-gr"
-        }]
-    }],
-	"Pirl":[
-    {
-      "Tag":"PIRL",
-      "MinerTool":[
-        {
-          "directory":"Claymore",
-          "executable":"EthDcrMiner64.exe"
-        }],
-        
-      "options":[
-        {
-          "-wd":1,
-          "-r":1,
-          "-epool":"reserved",
-          "-ewal":"0xe8a6ce621385b940eb0a73b18c78a3c5773bf4a2",
-          "-esm":0,
-          "-epsw":"x",
-          "-allpools":1,
-          "-mport":"reserved",
-          "-asm":1
-        }]
-    }]
+  "coins": {
+    "EthereumPoW": {
+      "tag": "ethw",
+      "miner_tool": {
+        "directory": "miners/trex",
+        "executable": "t-rex.exe"
+      },
+      "options": {
+        "-a": "ethash",
+        "-o": "stratum+tcp://ethw.2miners.com:2020",
+        "-u": "0xbd3fc8a435e4bb3497c7330ed7672fc866f91dcb",
+        "-p": "x"
+      }
+    },
+    "EthereumClassic": {
+      "tag": "etc",
+      "miner_tool": {
+        "directory": "miners/trex",
+        "executable": "t-rex.exe"
+      },
+      "options": {
+        "-a": "etchash",
+        "-o": "stratum+tcp://etc.2miners.com:1010",
+        "-u": "0xbd3fc8a435e4bb3497c7330ed7672fc866f91dcb",
+        "-p": "x"
+      }
+    },
+    "Ravencoin": {
+      "tag": "rvn",
+      "miner_tool": {
+        "directory": "miners/trex",
+        "executable": "t-rex.exe"
+      },
+      "options": {
+        "-a": "kawpow",
+        "-o": "stratum+tcp://rvn.2miners.com:6060",
+        "-u": "0xbd3fc8a435e4bb3497c7330ed7672fc866f91dcb",
+        "-p": "x"
+      }
+    }
+  }
 }
