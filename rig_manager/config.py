@@ -41,7 +41,7 @@ def _load_new_schema(data: dict[str, Any], base_dir: Path) -> AppConfig:
         poll_interval_seconds=int(settings_raw.get("poll_interval_seconds", 300)),
         report_dir=_as_path(base_dir, settings_raw.get("report_dir", "reports")),
         what_to_mine_url=str(settings_raw.get("what_to_mine_url", "https://whattomine.com/coins.json")),
-        pool_url_template=str(settings_raw.get("pool_url_template", "https://investoon.com/mining_pools/{tag}")),
+        pool_url_template=str(settings_raw.get("pool_url_template", "https://miningpoolstats.stream/{tag}")),
         allow_launch=bool(settings_raw.get("allow_launch", False)),
         min_profit_delta_percent=float(settings_raw.get("min_profit_delta_percent", 5.0)),
     )

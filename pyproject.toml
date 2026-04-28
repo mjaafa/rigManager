@@ -12,7 +12,8 @@ license = {file = "LICENSE"}
 dependencies = [
   "requests>=2.31.0",
   "beautifulsoup4>=4.12.0",
-  "psutil>=5.9.0"
+  "psutil>=5.9.0",
+  "selenium>=4.0.0"
 ]
 
 [project.scripts]

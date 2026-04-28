@@ -4,20 +4,20 @@
     "poll_interval_seconds": 300,
     "report_dir": "reports",
     "what_to_mine_url": "https://whattomine.com/coins.json",
-    "pool_url_template": "https://investoon.com/mining_pools/{tag}",
+    "pool_url_template": "https://miningpoolstats.stream/{tag}",
     "allow_launch": true,
     "min_profit_delta_percent": 5.0
   },
   "coins": {
     "EthereumPoW": {
-      "tag": "ethw",
+      "tag": "ethereumpow",
       "miner_tool": {
         "directory": "miners/trex",
         "executable": "t-rex.exe"
       },
       "options": {
         "-a": "ethash",
-        "-o": "stratum+tcp://ethw.2miners.com:2020",
+        "-o": "reserved",
         "-u": "0xbd3fc8a435e4bb3497c7330ed7672fc866f91dcb",
         "-p": "x"
       }
@@ -30,7 +30,7 @@
       },
       "options": {
         "-a": "etchash",
-        "-o": "stratum+tcp://etc.2miners.com:1010",
+        "-o": "reserved",
         "-u": "0xbd3fc8a435e4bb3497c7330ed7672fc866f91dcb",
         "-p": "x"
       }
@@ -43,7 +43,7 @@
       },
       "options": {
         "-a": "kawpow",
-        "-o": "stratum+tcp://rvn.2miners.com:6060",
+        "-o": "reserved",
         "-u": "0xbd3fc8a435e4bb3497c7330ed7672fc866f91dcb",
         "-p": "x"
       }

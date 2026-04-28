@@ -13,7 +13,7 @@ def migrate(input_path: Path, output_path: Path) -> None:
             "poll_interval_seconds": 300,
             "report_dir": "reports",
             "what_to_mine_url": "https://whattomine.com/coins.json",
-            "pool_url_template": "https://investoon.com/mining_pools/{tag}",
+            "pool_url_template": "https://miningpoolstats.stream/{tag}",
             "allow_launch": False,
         },
         "coins": {},

@@ -49,7 +49,7 @@ def choose_best_coin(
             continue
         result = ProfitabilityResult(
             coin_name=coin_name,
-            tag=str(raw.get("tag", config.coins[coin_name].tag)).lower(),
+            tag=config.coins[coin_name].tag,
             profitability=_to_float(raw.get("profitability")),
             profitability24=_to_float(raw.get("profitability24")),
             raw=raw,

@@ -28,7 +28,7 @@ class AppSettings:
     poll_interval_seconds: int = 300
     report_dir: Path = Path("reports")
     what_to_mine_url: str = "https://whattomine.com/coins.json"
-    pool_url_template: str = "https://investoon.com/mining_pools/{tag}"
+    pool_url_template: str = "https://miningpoolstats.stream/{tag}"
     allow_launch: bool = False
     min_profit_delta_percent: float = 5.0
 
@@ -54,6 +54,9 @@ class PoolResult:
     server: str | None = None
     port: str | None = None
     source_url: str | None = None
+    name: str | None = None
+    hashrate: float = 0.0
+    fee_pct: float = 0.0
     raw: dict[str, Any] = field(default_factory=dict)
 
 
